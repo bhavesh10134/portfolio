@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do List | Bhavesh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --card: #1a1a24;
+      --border: #2e2e42;
+      --accent: #7c3aed;
+      --accent2: #a78bfa;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --done: #22c55e;
+      --delete: #ef4444;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+      background-image: radial-gradient(ellipse at 20% 20%, rgba(124,58,237,0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, rgba(167,139,250,0.08) 0%, transparent 60%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      margin-top: 6px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent2);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .input-row input {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .input-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .input-row input::placeholder { color: var(--muted); }
+
+    .btn-add {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 22px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-add:hover { background: #6d28d9; transform: scale(1.04); }
+    .btn-add:active { transform: scale(0.97); }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .todo-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .todo-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.25s ease;
+      transition: border 0.2s;
+    }
+
+    .todo-item:hover { border-color: var(--accent); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .todo-check {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .todo-check:hover { border-color: var(--done); }
+    .todo-item.done .todo-check { background: var(--done); border-color: var(--done); }
+
+    .todo-text {
+      flex: 1;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      border-radius: 6px;
+      width: 28px; height: 28px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-delete:hover { background: rgba(239,68,68,0.15); color: var(--delete); border-color: var(--delete); }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      padding: 40px 0;
+    }
+
+    .clear-btn {
+      margin-top: 20px;
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-btn:hover { border-color: var(--delete); color: var(--delete); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>My Tasks</h1>
+    <p>// stay productive, stay focused</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="totalCount">0</div>
+      <div class="stat-label">TOTAL</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="pendingCount">0</div>
+      <div class="stat-label">PENDING</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="doneCount">0</div>
+      <div class="stat-label">DONE</div>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input type="text" id="taskInput" placeholder="Add a new task..." maxlength="100"/>
+    <button class="btn-add" onclick="addTask()">+</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
+    <button class="filter-btn" onclick="setFilter('done', this)">Done</button>
+  </div>
+
+  <div class="todo-list" id="todoList"></div>
+  <button class="clear-btn" onclick="clearDone()">Clear completed tasks</button>
+</div>
+
+<script>
+  let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  let filter = 'all';
+
+  function save() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+
+  function render() {
+    const list = document.getElementById('todoList');
+    const filtered = tasks.filter(t =>
+      filter === 'all' ? true : filter === 'done' ? t.done : !t.done
+    );
+
+    document.getElementById('totalCount').textContent = tasks.length;
+    document.getElementById('pendingCount').textContent = tasks.filter(t => !t.done).length;
+    document.getElementById('doneCount').textContent = tasks.filter(t => t.done).length;
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty">// no tasks found</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(t => `
+      <div class="todo-item ${t.done ? 'done' : ''}" id="task-${t.id}">
+        <div class="todo-check" onclick="toggleTask(${t.id})">${t.done ? '✓' : ''}</div>
+        <span class="todo-text">${t.text}</span>
+        <button class="btn-delete" onclick="deleteTask(${t.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text) return;
+    tasks.push({ id: Date.now(), text, done: false });
+    input.value = '';
+    save(); render();
+  }
+
+  function toggleTask(id) {
+    tasks = tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
+    save(); render();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    save(); render();
+  }
+
+  function clearDone() {
+    tasks = tasks.filter(t => !t.done);
+    save(); render();
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  document.getElementById('taskInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  render();
+</script>
+</body>
+</html>
